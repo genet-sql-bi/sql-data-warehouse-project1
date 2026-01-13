@@ -3,7 +3,8 @@
 
 Welcome to the Data Warehouse and Analytics Project repository! 🚀
 This project demonstrates an end-to-end data warehousing and analytics solution, from building a SQL Server–based data warehouse to generating meaningful analytical insights.
-----------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------
 ## High-Level Data Warehouse Architecture (Medallion Architecture)
 
 | Layer    | Description                     | Object Type | Load Strategy                         | Transformations                                   | Data Model        |
@@ -19,6 +20,7 @@ This project demonstrates an end-to-end data warehousing and analytics solution,
 **Silver Layer**: Focuses on cleaning and standardizing the data by applying validation, normalization, and consistency rules to make it ready for analysis.
 
 **Gold Layer**: Contains business-ready data modeled using a star schema to support reporting, analytics, and decision-making.
+
 --------------------------------------------------------------------------------------------------------------
 **Project Overview**
 
