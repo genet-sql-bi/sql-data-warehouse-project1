@@ -36,29 +36,13 @@ This repository showcases practical skills in:
 - **ETL Pipeline Development** – Extract, transform, and load workflows
 - **Data Modeling** – Fact and dimension tables
 - **Data Analytics** – Business-focused reporting and insights
-*The data architecture for this project follows Medallion Architecture Bronze, Silver, and Gold layers: *
-
-Data Sources: Load data from two source systems (ERP and CRM) provided as CSV files.
-
-Data Quality: Clean, validate, and resolve data quality issues before analysis.
-
-Integration: Integrate both sources into a single, user-friendly data model optimized for analytical queries.
 
 Scope: Focus on the most recent dataset only; historical data tracking is not required.
 
 Documentation: Provide clear documentation of the data model to support both business stakeholders and analytics teams.
 
-BI: Analytics & Reporting (Data Analytics)
-Objective
-### BI: Analytics & Reporting (Data Analytics)
-
-|Layer   | Description                    | Object Type | Load Strategy                 | Transformations                                      | Data Model       |
-|---------|--------------------------------|-------------|-------------------------------|------------------------------------------------------|------------------|
-| Bronze  | Raw data from source systems   | Tables      | Full Load, Truncate & Insert  | None (raw, as-is data)                               | As-Is            |
-| Silver  | Cleaned and standardized data  | Tables      | Full Load, Truncate & Insert  | Data cleansing and standardization                   | As-Is            |
-| Gold    | Business-ready data            | Views       | No Load                       | Aggregations, business logic, integrations            | Star Schema      |
-| Consume | Analytics and insights         | BI Tools    | Read-Only                     | Reporting, ad-hoc analysis, machine learning          | Semantic Layer   |
-
+**BI: Analytics & Reporting (Data Analytics)**
+**Objective**
 
 Develop SQL-based analytics to deliver insights into:
 
@@ -69,8 +53,6 @@ Develop SQL-based analytics to deliver insights into:
 *Sales Trends*
 
 These insights help stakeholders understand key business metrics and support strategic, data-driven decision-making.
-## High-Level Architecture
-
 
 
 Hi! I’m GenetM.
