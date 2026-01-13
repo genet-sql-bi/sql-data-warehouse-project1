@@ -23,24 +23,24 @@ This repository showcases practical skills in:
 - **Data Modeling** – Fact and dimension tables
 - **Data Analytics** – Business-focused reporting and insights
 *The data architecture for this project follows Medallion Architecture Bronze, Silver, and Gold layers: *
-┌────────────────────┐   >>   ┌────────────────────┐   >>   ┌────────────────────┐   >>   ┌────────────────────┐
-│    Bronze Layer    │        │    Silver Layer    │        │     Gold Layer     │        │      Consume       │
-├────────────────────┤        ├────────────────────┤        ├────────────────────┤        ├────────────────────┤
-│ Raw / As-Is Data   │        │ Cleaned &          │        │ Business-Ready     │        │ BI & Reporting     │
-│                    │        │ Standardized Data  │        │ Data               │        │ Dashboards         │
-│ Object Type:       │        │ Object Type:       │        │ Object Type:       │        │ Ad-Hoc SQL         │
-│ Tables             │        │ Tables             │        │ Views              │        │ Analytics          │
-│                    │        │                    │        │                    │        │ Machine Learning  │
-│ Load:              │        │ Load:              │        │ Load:              │        │                    │
-│ Full Load          │        │ Full Load          │        │ No Load            │        │ Read-Only Access  │
-│ Truncate & Insert  │        │ Truncate & Insert  │        │                    │        │                    │
-│                    │        │                    │        │                    │        │ Data Source:      │
-│ Transformations:   │        │ Transformations:   │        │ Transformations:   │        │ Gold Views        │
-│ None               │        │ Cleansing          │        │ Aggregations       │        │                    │
-│                    │        │ Standardization    │        │ Business Logic     │        │                    │
-│ Data Model:        │        │ Data Model:        │        │ Data Model:        │        │                    │
-│ As-Is              │        │ As-Is              │        │ Star Schema        │        │                    │
-└────────────────────┘        └────────────────────┘        └────────────────────┘        └────────────────────┘
+┌────────────────────┐ >> ┌────────────────────┐ >> ┌────────────────────┐ >> ┌────────────────────┐
+│    Bronze Layer    │    │    Silver Layer    │    │     Gold Layer     │    │      Consume       │
+├────────────────────┤    ├────────────────────┤     ────────────────────┤    ├────────────────────┤
+│ Raw / As-Is Data   │    │ Cleaned &          │    │ Business-Ready     │    │ BI & Reporting     │
+│                    │    │ Standardized Data  │    │ Data               │    │ Dashboards         │
+│ Object Type:       │    │ Object Type:       │    │ Object Type:       │    │ Ad-Hoc SQL         │
+│ Tables             │    │ Tables             │    │ Views              │    │ Analytics          │
+│                    │    │                    │    │                    │    │ Machine Learning   │
+│ Load:              │    │ Load:              │    │ Load:              │    │                    │
+│ Full Load          │    │ Full Load          │    │ No Load            │    │ Read-Only Access   │
+│ Truncate & Insert  │    │ Truncate & Insert  │    │                    │    │                    │
+│                    │    │                    │    │                    │    │ Data Source:       │
+│ Transformations:   │    │ Transformations:   │    │ Transformations:   │    │ Gold Views         │
+│ None               │    │ Cleansing          │    │ Aggregations       │    │                    │
+│                    │    │ Standardization    │    │ Business Logic     │    │                    │
+│ Data Model:        │    │ Data Model:        │    │ Data Model:        │    │                    │
+│ As-Is              │    │ As-Is              │    │ Star Schema        │    │                    │
+└────────────────────┘    └────────────────────┘    └────────────────────┘    └────────────────────┘
 
 Data Sources: Load data from two source systems (ERP and CRM) provided as CSV files.
 
