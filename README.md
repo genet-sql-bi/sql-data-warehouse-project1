@@ -55,6 +55,59 @@ Develop SQL-based analytics to deliver insights into:
 *Sales Trends*
 
 These insights help stakeholders understand key business metrics and support strategic, data-driven decision-making.
+## High-Level Architecture
+
+```mermaid
+flowchart LR
+
+%% ================= SOURCES =================
+subgraph S[Sources]
+    CRM[CRM<br/>CSV Files]
+    ERP[ERP<br/>CSV Files]
+end
+
+%% ================= BRONZE =================
+subgraph B[Bronze Layer]
+    B1[Raw Data]
+    B2[Object Type: Tables]
+    B3[Load:<br/>• Full Load<br/>• Truncate & Insert]
+    B4[Transformations:<br/>None]
+    B5[Data Model:<br/>As-Is]
+end
+
+%% ================= SILVER =================
+subgraph SI[Silver Layer]
+    S1[Cleaned & Standardized Data]
+    S2[Object Type: Tables]
+    S3[Load:<br/>• Full Load<br/>• Truncate & Insert]
+    S4[Transformations:<br/>• Cleansing<br/>• Standardization<br/>• Derived Columns]
+    S5[Data Model:<br/>As-Is]
+end
+
+%% ================= GOLD =================
+subgraph G[Gold Layer]
+    G1[Business-Ready Data]
+    G2[Object Type: Views]
+    G3[Load:<br/>No Load]
+    G4[Transformations:<br/>• Aggregations<br/>• Business Logic<br/>• Integrations]
+    G5[Data Model:<br/>Star Schema]
+end
+
+%% ================= CONSUME =================
+subgraph C[Consume]
+    C1[BI & Reporting]
+    C2[Ad-Hoc SQL Queries]
+    C3[Analytics]
+    C4[Machine Learning]
+end
+
+%% ================= FLOW =================
+CRM --> B
+ERP --> B
+B --> SI
+SI --> G
+G --> C
+```
 
 Hi! I’m GenetM.
 I’m a data and analytics professional with a strong interest in data warehousing, SQL, and analytics. I enjoy building end-to-end data solutions and turning raw data into meaningful insights that support better decision-making.
