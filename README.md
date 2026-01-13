@@ -10,7 +10,7 @@ Designed as a portfolio project, it follows industry best practices in modern da
 
 This project covers the full data lifecycle, including:
 
-Data Architecture
+1.***Data Architecture***
 Designing a modern data warehouse using the Medallion Architecture (Bronze, Silver, and Gold layers).
 
 ETL Pipelines
