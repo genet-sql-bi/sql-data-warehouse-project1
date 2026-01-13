@@ -3,7 +3,7 @@
 
 Welcome to the Data Warehouse and Analytics Project repository! 🚀
 This project demonstrates an end-to-end data warehousing and analytics solution, from building a SQL Server–based data warehouse to generating meaningful analytical insights.
-
+----------------------------------------------------------------------------------------------------------------
 ## High-Level Data Warehouse Architecture (Medallion Architecture)
 
 | Layer    | Description                     | Object Type | Load Strategy                         | Transformations                                   | Data Model        |
@@ -19,7 +19,7 @@ This project demonstrates an end-to-end data warehousing and analytics solution,
 **Silver Layer**: Focuses on cleaning and standardizing the data by applying validation, normalization, and consistency rules to make it ready for analysis.
 
 **Gold Layer**: Contains business-ready data modeled using a star schema to support reporting, analytics, and decision-making.
-
+--------------------------------------------------------------------------------------------------------------
 **Project Overview**
 
 This project covers the full data lifecycle, including:
@@ -37,9 +37,28 @@ This repository showcases practical skills in:
 - **Data Modeling** – Fact and dimension tables
 - **Data Analytics** – Business-focused reporting and insights
 
-Scope: Focus on the most recent dataset only; historical data tracking is not required.
+------------------------------------------------------------------------------------------------------------
+**Project Requirements**
 
-Documentation: Provide clear documentation of the data model to support both business stakeholders and analytics teams.
+**Building the Data Warehouse (Data Engineering)**
+
+**Objective**
+
+Design and implement a modern data warehouse using SQL Server to centralize sales data and support analytical reporting and data-driven decision-making.
+
+**Specifications**
+
+**Data Sources**: Load data from two source systems (ERP and CRM) provided as CSV files.
+
+**Data Quality**: Identify, clean, and address data quality issues before performing analysis.
+
+**Data Integration**: Merge data from both source systems into a unified and analytics-friendly data model.
+
+**Scope**: Work only with the most recent dataset; historical tracking and versioning are out of scope.
+
+**Documentation**: Create clear and well-structured documentation of the data model to support business users and analytics teams.
+
+-------------------------------------------------------------------------------------------------------------
 
 **BI: Analytics & Reporting (Data Analytics)**
 **Objective**
