@@ -75,6 +75,7 @@ Develop SQL-based analytics to deliver insights into:
 
 These insights help stakeholders understand key business metrics and support strategic, data-driven decision-making.
 
+--------------------------------------------------------------------------------------------------------------
 
 Hi! I’m GenetM.
 I’m a data and analytics professional with a strong interest in data warehousing, SQL, and analytics. I enjoy building end-to-end data solutions and turning raw data into meaningful insights that support better decision-making.
