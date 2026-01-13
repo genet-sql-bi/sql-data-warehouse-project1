@@ -10,10 +10,10 @@ Designed as a portfolio project, it follows industry best practices in modern da
 
 This project covers the full data lifecycle, including:
 
-1.***Data Architecture*** Designing a modern data warehouse using the Medallion Architecture (Bronze, Silver, and Gold layers).
-1.***ETL Pipelines*** Extracting, transforming, and loading data from source systems into a centralized warehouse.
-1. ***Data Modeling*** Building fact and dimension tables optimized for analytical and reporting queries.
-1. ***Analytics & Reporting*** Creating SQL-based analytical queries to support business insights and decision-making.
+1. ***Data Architecture*** Designing a modern data warehouse using the Medallion Architecture (Bronze, Silver, and Gold layers).
+2. ***ETL Pipelines*** Extracting, transforming, and loading data from source systems into a centralized warehouse.
+3. ***Data Modeling*** Building fact and dimension tables optimized for analytical and reporting queries.
+4. ***Analytics & Reporting*** Creating SQL-based analytical queries to support business insights and decision-making.
 
 This repository is intended for professionals and students looking to showcase skills in:
 
