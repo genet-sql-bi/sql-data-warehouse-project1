@@ -4,8 +4,19 @@
 Welcome to the Data Warehouse and Analytics Project repository! 🚀
 This project demonstrates an end-to-end data warehousing and analytics solution, from building a SQL Server–based data warehouse to generating meaningful analytical insights.
 
-Designed as a portfolio project, it follows industry best practices in modern data engineering, data modeling, and analytics.
+## High-Level Data Warehouse Architecture (Medallion Architecture)
 
+| Layer    | Description                     | Object Type | Load Strategy                         | Transformations                                   | Data Model        |
+|----------|---------------------------------|-------------|----------------------------------------|---------------------------------------------------|-------------------|
+| Sources  | ERP & CRM source systems (CSV)  | Files       | File-based ingestion                   | None                                              | Source format     |
+| Bronze   | Raw, as-is data                 | Tables      | Full Load, Truncate & Insert           | None                                              | As-Is             |
+| Silver   | Cleaned & standardized data     | Tables      | Full Load, Truncate & Insert           | Cleansing, standardization, derived columns       | As-Is             |
+| Gold     | Business-ready data             | Views       | No Load                                | Aggregations, business logic, integrations        | Star Schema       |
+| Consume  | Analytics & insights            | BI Tools    | Read-Only                              | Reporting, ad-hoc analysis, machine learning      | Semantic Layer    |
+
+**Bronze Layer**: Stores raw data exactly as received from the source systems. Data is loaded from CSV files into the SQL Server database without transformations.
+**Silver Layer**: Focuses on cleaning and standardizing the data by applying validation, normalization, and consistency rules to make it ready for analysis.
+*Gold Layer*: Contains business-ready data modeled using a star schema to support reporting, analytics, and decision-making.
 **Project Overview**
 
 This project covers the full data lifecycle, including:
@@ -57,15 +68,6 @@ Develop SQL-based analytics to deliver insights into:
 These insights help stakeholders understand key business metrics and support strategic, data-driven decision-making.
 ## High-Level Architecture
 
-## High-Level Data Warehouse Architecture (Medallion Architecture)
-
-| Layer    | Description                     | Object Type | Load Strategy                         | Transformations                                   | Data Model        |
-|----------|---------------------------------|-------------|----------------------------------------|---------------------------------------------------|-------------------|
-| Sources  | ERP & CRM source systems (CSV)  | Files       | File-based ingestion                   | None                                              | Source format     |
-| Bronze   | Raw, as-is data                 | Tables      | Full Load, Truncate & Insert           | None                                              | As-Is             |
-| Silver   | Cleaned & standardized data     | Tables      | Full Load, Truncate & Insert           | Cleansing, standardization, derived columns       | As-Is             |
-| Gold     | Business-ready data             | Views       | No Load                                | Aggregations, business logic, integrations        | Star Schema       |
-| Consume  | Analytics & insights            | BI Tools    | Read-Only                              | Reporting, ad-hoc analysis, machine learning      | Semantic Layer    |
 
 
 Hi! I’m GenetM.
