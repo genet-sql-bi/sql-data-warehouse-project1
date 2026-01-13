@@ -15,8 +15,11 @@ This project demonstrates an end-to-end data warehousing and analytics solution,
 | Consume  | Analytics & insights            | BI Tools    | Read-Only                              | Reporting, ad-hoc analysis, machine learning      | Semantic Layer    |
 
 **Bronze Layer**: Stores raw data exactly as received from the source systems. Data is loaded from CSV files into the SQL Server database without transformations.
+
 **Silver Layer**: Focuses on cleaning and standardizing the data by applying validation, normalization, and consistency rules to make it ready for analysis.
-*Gold Layer*: Contains business-ready data modeled using a star schema to support reporting, analytics, and decision-making.
+
+**Gold Layer**: Contains business-ready data modeled using a star schema to support reporting, analytics, and decision-making.
+
 **Project Overview**
 
 This project covers the full data lifecycle, including:
