@@ -1,18 +1,40 @@
 
 # Data Warehouse and Analytics Project 
 
-Welcome to the Data Warehouse and Analytics Project repository!
-This project presents an end-to-end data warehousing and analytics solution, from designing and building a SQL Server–based data warehouse to generating meaningful analytical insights. It is created as a portfolio project and follows industry best practices in modern data engineering and analytics.
+Welcome to the Data Warehouse and Analytics Project repository! 🚀
+This project demonstrates an end-to-end data warehousing and analytics solution, from building a SQL Server–based data warehouse to generating meaningful analytical insights.
 
-*Project Requirements*
+Designed as a portfolio project, it follows industry best practices in modern data engineering, data modeling, and analytics.
 
-Building the Data Warehouse (Data Engineering)
+**Project Overview**
 
-*Objective*
+This project covers the full data lifecycle, including:
 
-Develop a modern data warehouse using SQL Server to consolidate sales data and support analytical reporting and informed decision-making.
+Data Architecture
+Designing a modern data warehouse using the Medallion Architecture (Bronze, Silver, and Gold layers).
 
-*Specifications*
+ETL Pipelines
+Extracting, transforming, and loading data from source systems into a centralized warehouse.
+
+Data Modeling
+Building fact and dimension tables optimized for analytical and reporting queries.
+
+Analytics & Reporting
+Creating SQL-based analytical queries to support business insights and decision-making.
+
+This repository is intended for professionals and students looking to showcase skills in:
+
+SQL Development
+
+Data Architecture
+
+Data Engineering
+
+ETL Pipeline Development
+
+Data Modeling
+
+Data Analytics
 
 Data Sources: Load data from two source systems (ERP and CRM) provided as CSV files.
 
