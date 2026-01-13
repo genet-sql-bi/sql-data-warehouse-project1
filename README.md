@@ -23,24 +23,6 @@ This repository showcases practical skills in:
 - **Data Modeling** – Fact and dimension tables
 - **Data Analytics** – Business-focused reporting and insights
 *The data architecture for this project follows Medallion Architecture Bronze, Silver, and Gold layers: *
-┌────────────────────┐*>*┌────────────────────┐ >> ┌────────────────────┐ >> ┌────────────────────┐
-│    Bronze Layer    │   │    Silver Layer    │    │     Gold Layer     │    │      Consume       │
-├────────────────────┤   ├────────────────────┤     ────────────────────┤    ├────────────────────┤
-│ Raw / As-Is Data   │   │ Cleaned &          │    │ Business-Ready     │    │ BI & Reporting     │
-│                    │   │ Standardized Data  │    │ Data               │    │ Dashboards         │
-│ Object Type:       │   │ Object Type:       │    │ Object Type:       │    │ Ad-Hoc SQL         │
-│ Tables             │   │ Tables             │    │ Views              │    │ Analytics          │
-│                    │   │                    │    │                    │    │ Machine Learning   │
-│ Load:              │   │ Load:              │    │ Load:              │    │                    │
-│ Full Load          │   │ Full Load          │    │ No Load            │    │ Read-Only Access   │
-│ Truncate & Insert  │   │ Truncate & Insert  │    │                    │    │                    │
-│                    │   │                    │    │                    │    │ Data Source:       │
-│ Transformations:   │   │ Transformations:   │    │ Transformations:   │    │ Gold Views         │
-│ None               │   │ Cleansing          │    │ Aggregations       │    │                    │
-│                    │   │ Standardization    │    │ Business Logic     │    │                    │
-│ Data Model:        │   │ Data Model:        │    │ Data Model:        │    │                    │
-│ As-Is              │   │ As-Is              │    │ Star Schema        │    │                    │
-└────────────────────┘   └────────────────────┘    └────────────────────┘    └────────────────────┘
 
 Data Sources: Load data from two source systems (ERP and CRM) provided as CSV files.
 
@@ -54,6 +36,15 @@ Documentation: Provide clear documentation of the data model to support both bus
 
 BI: Analytics & Reporting (Data Analytics)
 Objective
+### BI: Analytics & Reporting (Data Analytics)
+
+| Layer   | Description                    | Object Type | Load Strategy                 | Transformations                                      | Data Model       |
+|---------|--------------------------------|-------------|-------------------------------|------------------------------------------------------|------------------|
+| Bronze  | Raw data from source systems   | Tables      | Full Load, Truncate & Insert  | None (raw, as-is data)                               | As-Is            |
+| Silver  | Cleaned and standardized data  | Tables      | Full Load, Truncate & Insert  | Data cleansing and standardization                   | As-Is            |
+| Gold    | Business-ready data            | Views       | No Load                       | Aggregations, business logic, integrations            | Star Schema      |
+| Consume | Analytics and insights         | BI Tools    | Read-Only                     | Reporting, ad-hoc analysis, machine learning          | Semantic Layer   |
+
 
 Develop SQL-based analytics to deliver insights into:
 
