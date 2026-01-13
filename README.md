@@ -38,7 +38,7 @@ BI: Analytics & Reporting (Data Analytics)
 Objective
 ### BI: Analytics & Reporting (Data Analytics)
 
-| Layer   | Description                    | Object Type | Load Strategy                 | Transformations                                      | Data Model       |
+|Layer   | Description                    | Object Type | Load Strategy                 | Transformations                                      | Data Model       |
 |---------|--------------------------------|-------------|-------------------------------|------------------------------------------------------|------------------|
 | Bronze  | Raw data from source systems   | Tables      | Full Load, Truncate & Insert  | None (raw, as-is data)                               | As-Is            |
 | Silver  | Cleaned and standardized data  | Tables      | Full Load, Truncate & Insert  | Data cleansing and standardization                   | As-Is            |
