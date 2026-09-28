@@ -9,7 +9,35 @@ This project demonstrates an end-to-end data warehousing and analytics solution,
 - **ETL logging and error handling**: every table load is logged with row counts, duration, and status; failures are re-thrown instead of silently swallowed
 - **Analytical SQL**: seven business analyses using window functions, including RFM customer segmentation and historical margin analysis
 
-------------------------------------------------------------------------------------------------------------------
+## Key Findings
+
+**Product history changes the margin story**
+
+When I first built the product dimension, I only kept the current version of each product, which meant every past sale was costed at today's price. Once I kept the full history (SCD Type 2), the margins for earlier years looked quite different:
+
+| Year | Margin (cost at time of sale) | Margin (today's cost) | Cost difference |
+|------|------|------|------|
+| 2011 | 40.2% | 39.9% | $22K |
+| 2012 | 42.0% | 35.2% | $396K |
+| 2013 | 42.8% | 41.1% | $286K |
+
+2012 is the big one. Using today's costs would have made that year look almost 7 points worse than it really was, and nearly all of that comes from Bikes. It doesn't always go in the same direction, though. Some Accessories got cheaper over time, so for them the current cost actually makes past margins look slightly better. Either way, without history the numbers for past years are just wrong.
+
+**A small group of customers brings in a big share of revenue**
+
+I used RFM (recency, frequency, monetary) to group customers. The top group, which I called Champions, is only about 11% of customers but brings in 31% of revenue.
+
+The group I'd pay most attention to is At Risk. These customers generated 28.5% of revenue, almost as much as the Champions, but on average they haven't ordered in around 9 months. If this were a real business, that's where I'd focus a retention campaign first.
+
+**The business changed from a bike shop to a broader retailer**
+
+Until 2012 the company only sold bikes. Accessories and Clothing show up for the first time in 2012, with very small numbers, so they must have launched near the end of that year. In 2013 total sales almost tripled, from $5.8M to $16.3M. Bikes still made up about 94% of it, but the new lines were already bringing in around 6%.
+
+Bike sales actually dropped by about 17% in 2012 before the big jump in 2013. The data doesn't say why, but it's the kind of thing I'd want to ask the business about.
+
+*Note: 2010 and 2014 are partial years (the data covers late December 2010 to January 2014), so I don't use them for year-over-year comparisons. Some growth figures in the raw output look huge for that reason, and I don't treat them as real growth.*
+
+--------------------------------------------------------------------------------------------------------------
 ## High-Level Data Warehouse Architecture (Medallion Architecture)
 
 | Layer    | Description                     | Object Type | Load Strategy                         | Transformations                                   | Data Model        |
@@ -133,6 +161,7 @@ sql-data-warehouse-project1/
 - **Log to a table, not just PRINT.** `PRINT` output is lost when the session ends. `etl.load_log` keeps a permanent run history (rows, duration, status, error) that can be queried or monitored.
 - **Re-throw errors.** The load procedures log the failure and then `THROW`, so a scheduler such as SQL Agent sees a failed load as failed.
 - **Gold as views.** Views keep the gold layer always in sync with silver and are simple to maintain at this data size. At larger volumes, I would materialize the gold layer as tables with stable `IDENTITY` surrogate keys and indexes, because `ROW_NUMBER()` keys in views are recalculated on every query.
+- **Flag, don't delete, suspicious data.** Quality checks flag 15 customers born before 1924. They are kept, since they may be valid, and flagged for source-system review instead of being silently removed. Only birthdates in the future are set to NULL, because they are impossible.
 
 --------------------------------------------------------------------------------------------------------------
 
