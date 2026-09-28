@@ -112,7 +112,10 @@ GO
 -- Create View: gold.customer_rfm  (RFM customer segmentation)
 --===============================================================
 -- One row per customer with Recency, Frequency, Monetary values,
--- 1-5 scores (5 = best), and a segment label. Used by the Power BI
+-- 1-5 scores (5 = best), and a segment label.
+-- Recency and monetary are scored with NTILE(5). Frequency uses fixed
+-- thresholds (1 order = 1, 2 orders = 3, 3+ orders = 5), because 63% of
+-- customers have exactly one order and NTILE would split them arbitrarily. Used by the Power BI
 -- Customers page. See analytics/05_customer_rfm_segmentation.sql
 -- for the segment-level summary.
 IF OBJECT_ID('gold.customer_rfm', 'V') IS NOT NULL
@@ -139,7 +142,11 @@ scored AS (
 	SELECT
 		*,
 		NTILE(5) OVER (ORDER BY recency_days DESC) AS r_score,  -- most recent customers get 5
-		NTILE(5) OVER (ORDER BY frequency)         AS f_score,
+		CASE                                               -- fixed thresholds: most customers have 1-2 orders,
+			WHEN frequency >= 3 THEN 5                     -- so NTILE would split identical customers
+			WHEN frequency = 2  THEN 3                     -- into different scores at random
+			ELSE 1
+		END                                        AS f_score,
 		NTILE(5) OVER (ORDER BY monetary)          AS m_score
 	FROM customer_metrics
 )

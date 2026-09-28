@@ -7,14 +7,16 @@ Which customers are our most valuable, which are at risk of churning,
 and how much revenue does each segment represent?
 
 RFM = Recency (days since last order), Frequency (number of orders),
-      Monetary (total spend). Each is scored 1-5 with NTILE(5),
-      where 5 is best.
+      Monetary (total spend). Each is scored 1-5, where 5 is best.
 
-Note: many customers have exactly one order, so NTILE splits ties in
-frequency arbitrarily. That is acceptable for segmentation but worth
-knowing when reading individual scores.
+Scoring:
+- Recency and Monetary use NTILE(5), which splits customers into five
+  equal-sized groups. These values rarely tie, so this works well.
+- Frequency uses fixed thresholds: 1 order = 1, 2 orders = 3, 3+ orders = 5.
+  63% of customers have exactly one order, so NTILE(5) would put identical
+  customers into different frequency scores at random.
 
-Techniques: variable, multiple CTEs, NTILE(), CASE-based segmentation,
+Techniques: variable, multiple CTEs, NTILE(), CASE-based scoring and segmentation,
             share of total with SUM(SUM()) OVER ()
 ====================================================================
 */
@@ -39,7 +41,11 @@ scored AS (
     SELECT
         *,
         NTILE(5) OVER (ORDER BY recency_days DESC) AS r_score,  -- most recent customers get 5
-        NTILE(5) OVER (ORDER BY frequency)         AS f_score,
+        CASE                                        -- fixed thresholds (see note above)
+            WHEN frequency >= 3 THEN 5
+            WHEN frequency = 2  THEN 3
+            ELSE 1
+        END                                        AS f_score,
         NTILE(5) OVER (ORDER BY monetary)          AS m_score
     FROM customer_metrics
 ),
