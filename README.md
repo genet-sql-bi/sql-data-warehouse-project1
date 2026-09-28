@@ -23,11 +23,13 @@ When I first built the product dimension, I only kept the current version of eac
 
 2012 is the big one. Using today's costs would have made that year look almost 7 points worse than it really was, and nearly all of that comes from Bikes. It doesn't always go in the same direction, though. Some Accessories got cheaper over time, so for them the current cost actually makes past margins look slightly better. Either way, without history the numbers for past years are just wrong.
 
-**A small group of customers brings in a big share of revenue**
+**Repeat customers drive most of the revenue**
 
-I used RFM (recency, frequency, monetary) to group customers. The top group, which I called Champions, is only about 11% of customers but brings in 31% of revenue.
+I used RFM (recency, frequency, monetary) to group customers. My first version scored frequency with NTILE, but 63% of customers only ever placed one order, so NTILE was putting identical customers into different groups at random. I switched frequency to fixed thresholds (1 order, 2 orders, 3 or more), which made the segments much cleaner.
 
-The group I'd pay most attention to is At Risk. These customers generated 28.5% of revenue, almost as much as the Champions, but on average they haven't ordered in around 9 months. If this were a real business, that's where I'd focus a retention campaign first.
+The result: customers who ordered more than once are only 37% of the customer base but bring in 77% of revenue.
+
+The group I'd pay most attention to is At Risk. They're 11% of customers but 27% of revenue, they've ordered twice on average, and they haven't come back in about 9 months. These are proven repeat buyers going quiet, so if this were a real business, that's where I'd focus a retention campaign first.
 
 **The business changed from a bike shop to a broader retailer**
 
