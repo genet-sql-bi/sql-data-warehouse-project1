@@ -7,7 +7,7 @@ This script creates tables in the Silver schema.
 If the tables already exist, they will be dropped and recreated.
 This helps keep the Silver layer clean and consistent.
 
-Run this script to re-define the DDL structure of 'bronze' tables
+Run this script to re-define the DDL structure of 'silver' tables
 ============================================================================
 */
 IF OBJECT_ID ('silver.crm_cust_info', 'U') IS NOT NULL
