@@ -19,7 +19,7 @@ When I first built the product dimension, I only kept the current version of eac
 |------|------|------|------|
 | 2011 | 40.2% | 39.9% | $22K |
 | 2012 | 42.0% | 35.2% | $396K |
-| 2013 | 42.8% | 41.1% | $286K |
+| 2013 | 43.1% | 41.4% | $286K |
 
 2012 is the big one. Using today's costs would have made that year look almost 7 points worse than it really was, and nearly all of that comes from Bikes. It doesn't always go in the same direction, though. Some Accessories got cheaper over time, so for them the current cost actually makes past margins look slightly better. Either way, without history the numbers for past years are just wrong.
 
