@@ -1,13 +1,21 @@
+# Sales Data Warehouse and Analytics (SQL Server + Power BI)
 
-# Data Warehouse and Analytics Project 
+An end-to-end sales analytics platform: a SQL Server data warehouse (bronze, silver, gold) loaded nightly from two source systems, a star schema with product history, analytical SQL, and a three-page Power BI dashboard.
 
-Welcome to the Data Warehouse and Analytics Project repository! 🚀
-This project demonstrates an end-to-end data warehousing and analytics solution, from building a SQL Server–based data warehouse to generating meaningful analytical insights.
-
-**Key features beyond a standard medallion build:**
+**What's in it:**
 - **SCD Type 2 product dimension**: sales are matched to the product version (and cost) valid on the order date
-- **ETL logging and error handling**: every table load is logged with row counts, duration, and status; failures are re-thrown instead of silently swallowed
+- **Transaction-safe loads**: each layer loads in a single transaction with `XACT_ABORT`, so a failed run rolls back to the last good state instead of leaving tables empty or half-loaded
+- **Data quality gate**: a table that loads 0 rows (for example, an empty source file) fails the load, so bad input can't wipe good data
+- **ETL logging and error handling**: every table load is logged with row counts, duration, and status; failures are logged after the rollback and re-thrown instead of silently swallowed
+- **Nightly automation**: a SQL Server Agent job runs bronze, then silver, every night at 2:00 AM and stops if bronze fails
 - **Analytical SQL**: seven business analyses using window functions, including RFM customer segmentation and historical margin analysis
+- **Power BI dashboard**: three pages (Executive Overview, Customers, Products & Margin) built on the gold layer
+
+## Dashboard
+
+![Executive Overview](docs/dashboard_overview.png)
+
+Three pages: Executive Overview, Customers (RFM segments), and Products & Margin (true margin vs current cost). Screenshots of all pages, the data model, and the DAX measures are in [`powerbi/README.md`](powerbi/README.md).
 
 ## Key Findings
 
@@ -42,19 +50,21 @@ Bike sales actually dropped by about 17% in 2012 before the big jump in 2013. Th
 --------------------------------------------------------------------------------------------------------------
 ## High-Level Data Warehouse Architecture (Medallion Architecture)
 
-| Layer    | Description                     | Object Type | Load Strategy                         | Transformations                                   | Data Model        |
-|----------|---------------------------------|-------------|----------------------------------------|---------------------------------------------------|-------------------|
-| Sources  | ERP & CRM source systems (CSV)  | Files       | File-based ingestion                   | None                                              | Source format     |
-| Bronze   | Raw, as-is data                 | Tables      | Full Load, Truncate & Insert           | None                                              | As-Is             |
-| Silver   | Cleaned & standardized data     | Tables      | Full Load, Truncate & Insert           | Cleansing, standardization, derived columns       | As-Is             |
-| Gold     | Business-ready data             | Views       | No Load                                | Aggregations, business logic, integrations        | Star Schema       |
-| Consume  | Analytics & insights            | BI Tools    | Read-Only                              | Reporting, ad-hoc analysis, machine learning      | Semantic Layer    |
+| Layer    | Description                     | Object Type | Load Strategy                                      | Transformations                                   | Data Model        |
+|----------|---------------------------------|-------------|----------------------------------------------------|---------------------------------------------------|-------------------|
+| Sources  | ERP & CRM source systems (CSV)  | Files       | File-based ingestion                               | None                                              | Source format     |
+| Bronze   | Raw, as-is data                 | Tables      | Full Load, Truncate & Insert (one transaction)     | None                                              | As-Is             |
+| Silver   | Cleaned & standardized data     | Tables      | Full Load, Truncate & Insert (one transaction)     | Cleansing, standardization, derived columns       | As-Is             |
+| Gold     | Business-ready data             | Views       | No Load                                            | Aggregations, business logic, integrations        | Star Schema       |
+| Consume  | Analytics & insights            | BI Tools    | Read-Only                                          | Reporting, ad-hoc analysis, machine learning      | Semantic Layer    |
 
 **Bronze Layer**: Stores raw data exactly as received from the source systems. Data is loaded from CSV files into the SQL Server database without transformations.
 
 **Silver Layer**: Focuses on cleaning and standardizing the data by applying validation, normalization, and consistency rules to make it ready for analysis.
 
 **Gold Layer**: Contains business-ready data modeled using a star schema to support reporting, analytics, and decision-making.
+
+**Orchestration**: A SQL Server Agent job (`DWH - Nightly Load`) runs the bronze load, then the silver load, every night at 2:00 AM. If bronze fails, the job stops, so silver never runs on bad data. Gold needs no step because its views always read the latest silver data.
 
 ### Data Flow (Lineage)
 ![Data Flow](docs/Data%20Flow%20(data%20Lineage).PNG)
@@ -68,50 +78,12 @@ Bike sales actually dropped by about 17% in 2012 before the big jump in 2013. Th
 Full column definitions for the Gold layer are in the [Data Catalog](docs/data_catalog.md).
 
 --------------------------------------------------------------------------------------------------------------
-**Project Overview**
-
-This project covers the full data lifecycle, including:
-
-1. ***Data Architecture*** Designing a modern data warehouse using the Medallion Architecture (Bronze, Silver, and Gold layers).
-2. ***ETL Pipelines*** Extracting, transforming, and loading data from source systems into a centralized warehouse.
-3. ***Data Modeling*** Building fact and dimension tables optimized for analytical and reporting queries.
-4. ***Analytics & Reporting*** Creating SQL-based analytical queries to support business insights and decision-making.
-   
-This repository showcases practical skills in:
-- **SQL Development** – Writing optimized queries and validations
-- **Data Architecture** – Designing medallion architecture (Bronze/Silver/Gold)
-- **Data Engineering** – Building scalable data pipelines
-- **ETL Pipeline Development** – Extract, transform, and load workflows
-- **Data Modeling** – Fact and dimension tables
-- **Data Analytics** – Business-focused reporting and insights
-
-------------------------------------------------------------------------------------------------------------
-**Project Requirements**
-
-**Building the Data Warehouse (Data Engineering)**
-
-**Objective**
-
-Design and implement a modern data warehouse using SQL Server to centralize sales data and support analytical reporting and data-driven decision-making.
-
-**Specifications**
-
-**Data Sources**: Load data from two source systems (ERP and CRM) provided as CSV files.
-
-**Data Quality**: Identify, clean, and address data quality issues before performing analysis.
-
-**Data Integration**: Merge data from both source systems into a unified and analytics-friendly data model.
-
-**Scope**: Work only with the most recent dataset; historical tracking and versioning are out of scope.
-
-**Documentation**: Create clear and well-structured documentation of the data model to support business users and analytics teams.
-
--------------------------------------------------------------------------------------------------------------
-
 ## Tools Used
-- **SQL Server Express** – database engine
+- **SQL Server (Developer edition)** – database engine
+- **SQL Server Agent** – nightly job scheduling
 - **SQL Server Management Studio (SSMS)** – running and managing scripts
-- **Git & GitHub** – version control
+- **Power BI Desktop** – dashboard and DAX measures
+- **Git, GitHub & VS Code** – version control
 - **Draw.io** – architecture and data model diagrams
 
 --------------------------------------------------------------------------------------------------------------
@@ -123,15 +95,16 @@ sql-data-warehouse-project1/
 ├── datasets/
 │   ├── source_crm/          # cust_info, prd_info, sales_details (CSV)
 │   └── source_erp/          # CUST_AZ12, LOC_A101, PX_CAT_G1V2 (CSV)
-├── docs/                    # Architecture diagrams, data model, data catalog
+├── docs/                    # Architecture diagrams, data model, data catalog, dashboard screenshots
 ├── scripts/
 │   ├── init_database.sql    # Creates the DataWarehouse database and schemas
 │   ├── etl/                 # ETL load log table and logging procedure
-│   ├── bronze/              # Bronze DDL and load procedure (BULK INSERT)
-│   ├── silver/              # Silver DDL and cleansing/transformation procedure
-│   └── gold/                # Gold star-schema views (SCD Type 2 product dimension, RFM view)
+│   ├── bronze/              # Bronze DDL and load procedure (BULK INSERT, transaction-safe)
+│   ├── silver/              # Silver DDL and cleansing/transformation procedure (transaction-safe)
+│   ├── gold/                # Gold star-schema views (SCD Type 2 product dimension, RFM view)
+│   └── automation/          # SQL Server Agent job for the nightly load
 ├── tests/                   # Data quality checks for Silver and Gold
-├── powerbi/                 # Power BI build guide: data model, DAX measures, page design
+├── powerbi/                 # Power BI report (.pbix) and documentation: data model, DAX measures, pages
 ├── LICENSE
 └── README.md
 ```
@@ -153,40 +126,32 @@ sql-data-warehouse-project1/
    SELECT * FROM etl.load_log ORDER BY log_id DESC;
    ```
 6. Run any query in `analytics/`. Each file starts with the business question it answers.
-7. For the dashboard, follow the setup in [`powerbi/README.md`](powerbi/README.md).
+7. *(Optional)* Schedule the nightly load: start SQL Server Agent, then run `scripts/automation/agent_job_nightly_load.sql`. SQL Server Agent is not available in SQL Server Express. Run the job once on demand with:
+   ```sql
+   EXEC msdb.dbo.sp_start_job @job_name = N'DWH - Nightly Load';
+   ```
+8. Open `powerbi/Sales_Margin_Insights.pbix` in Power BI Desktop to explore the dashboard. Refreshing it requires the database from step 3. Details are in [`powerbi/README.md`](powerbi/README.md).
 
 --------------------------------------------------------------------------------------------------------------
 
 ## Design Decisions
-- **SCD Type 2 for products.** The source keeps product history (77 products changed cost over time). Instead of keeping only the current version, the product dimension keeps every version with a validity range, and each sale joins to the version valid on its order date. Result: in 2012, the gross margin using historical cost is **42.0%**, versus **35.2%** if every sale were costed at today's price.
+- **SCD Type 2 for products.** The original brief covered only current data, but costing past sales at today's price gave wrong margins (see Key Findings). The source keeps product history (77 products changed cost over time). Instead of keeping only the current version, the product dimension keeps every version with a validity range, and each sale joins to the version valid on its order date. Result: in 2012, the gross margin using historical cost is **42.0%**, versus **35.2%** if every sale were costed at today's price.
 - **Open-ended first version.** About 30% of sales are dated before their product's first recorded start date. A strict date-range join would lose those product links, so the first version of each product is treated as valid from 1900-01-01. A quality check confirms every sale matches exactly one product version.
-- **Log to a table, not just PRINT.** `PRINT` output is lost when the session ends. `etl.load_log` keeps a permanent run history (rows, duration, status, error) that can be queried or monitored.
-- **Re-throw errors.** The load procedures log the failure and then `THROW`, so a scheduler such as SQL Agent sees a failed load as failed.
-- **Gold as views.** Views keep the gold layer always in sync with silver and are simple to maintain at this data size. At larger volumes, I would materialize the gold layer as tables with stable `IDENTITY` surrogate keys and indexes, because `ROW_NUMBER()` keys in views are recalculated on every query.
+- **One transaction per layer.** Each load procedure wraps all its tables in a single transaction with `SET XACT_ABORT ON`. If any table fails, the whole layer rolls back, so reports never see empty or half-loaded tables, or a mix of old and new data. I tested this by forcing the last silver table to fail: every silver table kept its previous rows, and the log recorded the failure.
+- **Fail on empty loads.** An error isn't the only way a load goes wrong: an empty or truncated source file loads 0 rows without any error. Each table load checks its row count and treats 0 rows as a failure, which triggers the rollback.
+- **Log to a table, not just PRINT.** `PRINT` output is lost when the session ends. `etl.load_log` keeps a permanent run history (rows, duration, status, error) that can be queried or monitored. The failure row is written after the rollback, so the rollback can't erase it.
+- **Re-throw errors.** The load procedures log the failure and then `THROW`, so the SQL Server Agent job sees a failed load as failed and stops before the next step.
+- **Gold as views.** Views keep the gold layer always in sync with silver and are simple to maintain at this data size, and Power BI imports the data at refresh, so views add no report latency. At larger volumes, I would materialize the gold layer as tables with stable `IDENTITY` surrogate keys and indexes, loaded at the end of the pipeline, because `ROW_NUMBER()` keys in views are recalculated on every query. Indexed views are not an option here: SQL Server does not allow outer joins or views built on other views in them, and the SCD Type 2 fact join needs both.
 - **Flag, don't delete, suspicious data.** Quality checks flag 15 customers born before 1924. They are kept, since they may be valid, and flagged for source-system review instead of being silently removed. Only birthdates in the future are set to NULL, because they are impossible.
 
 --------------------------------------------------------------------------------------------------------------
 
-**BI: Analytics & Reporting (Data Analytics)**
-**Objective**
-
-Develop SQL-based analytics to deliver insights into:
-
-*Customer Behavior*
-
-*Product Performance*
-
-*Sales Trends*
-
-These insights help stakeholders understand key business metrics and support strategic, data-driven decision-making.
-
---------------------------------------------------------------------------------------------------------------
-
 ## Acknowledgment
-The base dataset and initial structure come from the SQL Data Warehouse course by [Data With Baraa](https://github.com/DataWithBaraa/sql-data-warehouse-project). I extended it with an SCD Type 2 product dimension, ETL logging and error handling, automated SCD2 quality checks, and an analytics layer including RFM segmentation and historical margin analysis.
+Based on Data With Baraa's open-source [SQL Data Warehouse project](https://github.com/DataWithBaraa/sql-data-warehouse-project), which provided the source dataset and the initial bronze, silver, and gold structure. I extended it with an SCD Type 2 product dimension, transaction-safe loads with a data quality gate, ETL logging and error handling, a nightly SQL Server Agent job, automated data quality checks, RFM customer segmentation, historical margin analysis, and a Power BI dashboard.
+
 
 --------------------------------------------------------------------------------------------------------------
 
 ## About Me
-Hi! I’m GenetM.
-I’m a data and analytics professional with a strong interest in data warehousing, SQL, and analytics. I enjoy building end-to-end data solutions and turning raw data into meaningful insights that support better decision-making.
+Hi! I'm GenetM.
+I'm a data and analytics professional with experience in SQL, data warehousing, and Power BI. I enjoy building end-to-end data solutions and turning raw data into insights that support better decisions.
