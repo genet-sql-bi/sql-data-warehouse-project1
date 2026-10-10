@@ -14,8 +14,21 @@ standardization along the way:
 - Recalculates sales and price where they are missing, negative, or inconsistent.
 - Nulls out birthdates in the future.
 
+Transaction safety:
+The whole layer loads inside one transaction (SET XACT_ABORT ON + TRY...CATCH).
+If any table fails, every silver table rolls back to its last good state, so a
+failed run never leaves silver empty, half-loaded, or out of sync with itself
+(e.g. new customers but old sales).
+
+Data quality gate:
+If any table loads 0 rows (e.g. an empty or truncated source file), the load
+is treated as FAILED and rolled back, so an empty source can't wipe good data.
+
 Logging:
-Every table load is recorded in etl.load_log. On failure, the error is logged and re-thrown.
+Every table load is recorded in etl.load_log. SUCCESS rows are written inside
+the transaction, so they only persist if the whole layer commits. On failure,
+the transaction is rolled back first and the FAILED row is written afterwards,
+so the failure record is never lost. The error is then re-thrown.
 
 Parameters: None.
 
@@ -27,15 +40,20 @@ How to run:
 CREATE OR ALTER PROCEDURE silver.load_silver AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;   -- any runtime error dooms the transaction, so nothing is half-committed
 
     DECLARE @batch_id         UNIQUEIDENTIFIER = NEWID(),
             @table_name       NVARCHAR(128),
             @start_time       DATETIME2(0),
             @batch_start_time DATETIME2(0) = SYSDATETIME(),
             @rows             INT,
-            @error_message    NVARCHAR(4000);
+            @error_message    NVARCHAR(4000),
+            @error_number     INT,
+            @error_state      INT;
 
     BEGIN TRY
+        BEGIN TRANSACTION;   -- all tables in this layer succeed together or roll back together
+
         PRINT '==========================================================================';
         PRINT 'Loading Silver Layer';
         PRINT '==========================================================================';
@@ -83,6 +101,12 @@ BEGIN
         WHERE flag_last = 1;                    -- keep the most recent record per customer
         SET @rows = @@ROWCOUNT;
 
+        IF @rows = 0   -- data quality gate: an empty source must never replace good data
+        BEGIN
+            SET @error_message = @table_name + ' loaded 0 rows - source is empty or unreadable';
+            THROW 50001, @error_message, 1;   -- jumps to CATCH, which rolls back the whole layer
+        END;
+
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, @rows, 'SUCCESS';
         PRINT '>> Rows loaded: ' + CAST(@rows AS NVARCHAR(20));
 
@@ -120,6 +144,12 @@ BEGIN
                                                         AS prd_end_dt  -- end date = day before next version starts
         FROM bronze.crm_prd_info;
         SET @rows = @@ROWCOUNT;
+
+        IF @rows = 0   -- data quality gate: an empty source must never replace good data
+        BEGIN
+            SET @error_message = @table_name + ' loaded 0 rows - source is empty or unreadable';
+            THROW 50001, @error_message, 1;   -- jumps to CATCH, which rolls back the whole layer
+        END;
 
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, @rows, 'SUCCESS';
         PRINT '>> Rows loaded: ' + CAST(@rows AS NVARCHAR(20));
@@ -166,6 +196,12 @@ BEGIN
         FROM bronze.crm_sales_details;
         SET @rows = @@ROWCOUNT;
 
+        IF @rows = 0   -- data quality gate: an empty source must never replace good data
+        BEGIN
+            SET @error_message = @table_name + ' loaded 0 rows - source is empty or unreadable';
+            THROW 50001, @error_message, 1;   -- jumps to CATCH, which rolls back the whole layer
+        END;
+
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, @rows, 'SUCCESS';
         PRINT '>> Rows loaded: ' + CAST(@rows AS NVARCHAR(20));
 
@@ -198,6 +234,12 @@ BEGIN
         FROM bronze.erp_CUST_AZ12;
         SET @rows = @@ROWCOUNT;
 
+        IF @rows = 0   -- data quality gate: an empty source must never replace good data
+        BEGIN
+            SET @error_message = @table_name + ' loaded 0 rows - source is empty or unreadable';
+            THROW 50001, @error_message, 1;   -- jumps to CATCH, which rolls back the whole layer
+        END;
+
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, @rows, 'SUCCESS';
         PRINT '>> Rows loaded: ' + CAST(@rows AS NVARCHAR(20));
 
@@ -220,6 +262,12 @@ BEGIN
             END AS CNTRY                        -- normalize country codes
         FROM bronze.erp_LOC_A101;
         SET @rows = @@ROWCOUNT;
+
+        IF @rows = 0   -- data quality gate: an empty source must never replace good data
+        BEGIN
+            SET @error_message = @table_name + ' loaded 0 rows - source is empty or unreadable';
+            THROW 50001, @error_message, 1;   -- jumps to CATCH, which rolls back the whole layer
+        END;
 
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, @rows, 'SUCCESS';
         PRINT '>> Rows loaded: ' + CAST(@rows AS NVARCHAR(20));
@@ -244,8 +292,16 @@ BEGIN
         FROM bronze.erp_PX_CAT_G1V2;
         SET @rows = @@ROWCOUNT;
 
+        IF @rows = 0   -- data quality gate: an empty source must never replace good data
+        BEGIN
+            SET @error_message = @table_name + ' loaded 0 rows - source is empty or unreadable';
+            THROW 50001, @error_message, 1;   -- jumps to CATCH, which rolls back the whole layer
+        END;
+
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, @rows, 'SUCCESS';
         PRINT '>> Rows loaded: ' + CAST(@rows AS NVARCHAR(20));
+
+        COMMIT TRANSACTION;
 
         PRINT '==========================================================================';
         PRINT 'Silver Layer load completed';
@@ -253,18 +309,25 @@ BEGIN
         PRINT '==========================================================================';
     END TRY
     BEGIN CATCH
+        -- Capture error details first, then undo every table loaded in this run.
         SET @error_message = ERROR_MESSAGE();
+        SET @error_number  = ERROR_NUMBER();
+        SET @error_state   = ERROR_STATE();
         SET @table_name    = ISNULL(@table_name, 'n/a');
         SET @start_time    = ISNULL(@start_time, SYSDATETIME());
 
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        -- Logged after the rollback, so the FAILED row is kept.
         EXEC etl.log_load @batch_id, 'silver', @table_name, @start_time, NULL, 'FAILED', @error_message;
 
         PRINT '==========================================================================';
-        PRINT 'ERROR OCCURRED DURING LOADING SILVER LAYER';
+        PRINT 'ERROR OCCURRED DURING LOADING SILVER LAYER - all silver tables rolled back';
         PRINT 'Failed table: '  + @table_name;
         PRINT 'Error Message: ' + @error_message;
-        PRINT 'Error Number: '  + CAST(ERROR_NUMBER() AS NVARCHAR(20));
-        PRINT 'Error State: '   + CAST(ERROR_STATE() AS NVARCHAR(20));
+        PRINT 'Error Number: '  + CAST(@error_number AS NVARCHAR(20));
+        PRINT 'Error State: '   + CAST(@error_state AS NVARCHAR(20));
         PRINT '==========================================================================';
 
         THROW;   -- re-raise so the caller knows the load failed
